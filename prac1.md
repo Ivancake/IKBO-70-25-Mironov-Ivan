@@ -60,7 +60,7 @@ if [ ! -f "$file" ]; then
     exit 1
 fi
  
-# Дать права на выполнение
+### Дать права на выполнение
 chmod +x "$file"
  
 sudo cp "$file" /usr/local/bin/
