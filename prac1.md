@@ -1,12 +1,15 @@
 # Решения задач
 
 ## Задача 1.
+```bash
 cut -d: -f1 /etc/passwd | sort
-
+```
 ## Задача 2.
+```bash
 cat /etc/protocols | sort -k2 -n -r | head -5 | awk '{print $2, $1}'
-
+```
 ## Задача 3.
+```bash
 #!/bin/bash
  
 if [ "$#" -eq 0 ]; then
@@ -26,8 +29,9 @@ line+="+"
 echo "$line"
 echo "| $text |"
 echo "$line"
-
+```
 ## Задача 4
+```bash
 #!/bin/bash
  
 if [ "$#" -eq 0 ]; then
@@ -44,8 +48,9 @@ fi
  
 grep -oE '\b[A-Za-z_][A-Za-z0-9_]*\b' "$file" | sort -u | tr '\n' ' '
 echo
-
+```
 ## Задача 5
+```bash
 #!/bin/bash
  
 if [ "$#" -eq 0 ]; then
@@ -60,10 +65,10 @@ if [ ! -f "$file" ]; then
     exit 1
 fi
  
-### Дать права на выполнение
+# Дать права на выполнение
 chmod +x "$file"
  
 sudo cp "$file" /usr/local/bin/
 echo "Команда '$file' зарегистрирована"
-
+```
 ## Задача 6
