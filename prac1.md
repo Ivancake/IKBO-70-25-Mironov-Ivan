@@ -72,3 +72,51 @@ sudo cp "$file" /usr/local/bin/
 echo "Команда '$file' зарегистрирована"
 ```
 ## Задача 6
+``` bash                                                                                                               
+#!/bin/bash
+
+for file in *.c *.js *.py; do
+    [ -f "$file" ] || continue
+    first=$(head -n 1 "$file")
+    
+   case "$file" in 
+        *.c|*.js)
+            if [[ "$first" =~ ^[[:space:]]*(//|/\*) ]]; then
+                echo "$file: there is comment"
+            else
+                echo "$file: there  is no comment"
+            fi
+            ;;
+        *.py)
+            if [[ "$first" =~ ^[[:space:]]*# ]]; then
+                echo "$file: there is comment"
+            else
+                echo "$file: there is no comment"
+            fi
+            ;;
+    esac
+done
+```
+## Задача 7
+``` bash                                                  
+#!/bin/bash
+
+path="${1:-.}"
+
+find "$path" -type f -print0 | xargs -0 md5sum | sort | awk '   
+    {
+        hash = $1
+        file = substr($0, lengh($1) + 3)
+        if (hash in seen) {
+            if (!(hash in header_shown)) {
+                print "Group of duplicates (md5) "hash "):"                   
+                print "  " seen[hash]
+                header_shown[hash] = 1
+            }
+            print "  " file 
+        } else {
+            seen[hash] = file
+        }
+    }
+'
+```
