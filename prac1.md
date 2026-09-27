@@ -1,4 +1,4 @@
-# Решения задач
+# Решения задач практической работы 1
 
 ## Задача 1.
 ```bash
@@ -119,4 +119,68 @@ find "$path" -type f -print0 | xargs -0 md5sum | sort | awk '
         }
     }
 '
+```
+# Задача 8
+``` bash
+#!/bin/bash
+
+dir="${1:-.}"
+ext="$2"
+
+if [ -z "$ext" ]; then
+    echo "Использование: $0 <каталог> <расширение>" >&2
+    exit 1
+fi
+
+archive="${ext}_files.tar"
+
+mapfile -d '' files < <(find "$dir" -type f -name "*.${ext}" -print0)
+
+if [ "${#files[@]}" -eq 0 ]; then
+    echo "Файлы с расширением .$ext не найдены"
+    exit 0
+fi
+
+tar -cf "$archive" "${files[@]}"
+echo "Создан архив: $archive (файлов: ${#files[@]})"
+``` 
+# Задача 9
+``` bash
+#!/bin/bash
+
+input="$1"
+output="$2"
+
+if [ -z "$input" ] || [ -z "$output" ]; then
+    echo "Использование: $0 <входной_файл> <выходной_файл>" >&2
+    exit 1
+fi
+
+if [ ! -f "$input" ]; then
+    echo "Файл '$input' не найден" >&2
+    exit 1
+fi
+
+tab=$(printf '\t')
+sed "s/    /${tab}/g" "$input" > "$output"
+
+echo "Готово: $output"
+```
+# Задача 10
+``` bash
+#!/bin/bash
+
+dir="$1"
+
+if [ -z "$dir" ]; then
+    echo "Использование: $0 <директория>" >&2
+    exit 1
+fi
+
+if [ ! -d "$dir" ]; then
+    echo "Директория '$dir' не найдена" >&2
+    exit 1
+fi
+
+find "$dir" -maxdepth 1 -type f -name "*.txt" -empty -exec basename {} \;
 ```
