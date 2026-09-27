@@ -13,7 +13,7 @@ cat /etc/protocols | sort -k2 -n -r | head -5 | awk '{print $2, $1}'
 #!/bin/bash
  
 if [ "$#" -eq 0 ]; then
-    echo "Использование: $0 \"текст\""
+    echo "Использование: $0 \"текст\"" >&2
     exit 1
 fi
  
@@ -35,14 +35,14 @@ echo "$line"
 #!/bin/bash
  
 if [ "$#" -eq 0 ]; then
-    echo "Использование: $0 <файл>"
+    echo "Использование: $0 <файл>" >&2
     exit 1
 fi
  
 file="$1"
  
 if [ ! -f "$file" ]; then
-    echo "Файл не найден: $file"
+    echo "Файл не найден: $file" >&2
     exit 1
 fi
  
@@ -54,14 +54,14 @@ echo
 #!/bin/bash
  
 if [ "$#" -eq 0 ]; then
-    echo "Использование: $0 <файл>"
+    echo "Использование: $0 <файл>" >&2
     exit 1
 fi
  
 file="$1"
  
 if [ ! -f "$file" ]; then
-    echo "Файл не найден: $file"
+    echo "Файл не найден: $file" >&2
     exit 1
 fi
  
@@ -84,7 +84,7 @@ for file in *.c *.js *.py; do
             if [[ "$first" =~ ^[[:space:]]*(//|/\*) ]]; then
                 echo "$file: there is comment"
             else
-                echo "$file: there  is no comment"
+                echo "$file: there is no comment"
             fi
             ;;
         *.py)
@@ -106,7 +106,7 @@ path="${1:-.}"
 find "$path" -type f -print0 | xargs -0 md5sum | sort | awk '   
     {
         hash = $1
-        file = substr($0, lengh($1) + 3)
+        file = substr($0, length($1) + 3)
         if (hash in seen) {
             if (!(hash in header_shown)) {
                 print "Group of duplicates (md5) "hash "):"                   
