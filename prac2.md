@@ -164,3 +164,109 @@ output ["foo: " ++ ver(fix(foo)) ++ "\n",
         "shared: " ++ ver(fix(shared)) ++ "\n",
         "target: " ++ ver(fix(target))];
 ```
+## Задача 7
+```python
+# Задача 7. Построение системы ограничений MiniZinc по метаданным пакетов
+import subprocess
+
+# Метаданные пакетов: пакет -> версия -> {зависимость: условие на версию}
+packages = {
+    "root":   {"1.0.0": {"foo": "^1.0.0", "target": "^2.0.0"}},
+    "foo":    {"1.1.0": {"left": "^1.0.0", "right": "^1.0.0"},
+               "1.0.0": {}},
+    "left":   {"1.0.0": {"shared": ">=1.0.0"}},
+    "right":  {"1.0.0": {"shared": "<2.0.0"}},
+    "shared": {"2.0.0": {},
+               "1.0.0": {"target": "^1.0.0"}},
+    "target": {"2.0.0": {}, "1.0.0": {}},
+}
+ROOT = "root"
+
+
+def to_num(version):
+    """Версия в число: "1.2.3" -> 10203 (так версии удобно сравнивать)."""
+    major, minor, patch = map(int, version.split("."))
+    return major * 10000 + minor * 100 + patch
+
+
+def to_str(num):
+    """Число обратно в версию: 10203 -> "1.2.3"."""
+    return f"{num // 10000}.{num // 100 % 100}.{num % 100}"
+
+
+def matches(version, condition):
+    """Подходит ли версия под условие semver: ^X.Y.Z, >=X.Y.Z, <X.Y.Z или X.Y.Z."""
+    v = to_num(version)
+    if condition.startswith("^"):
+        low = to_num(condition[1:])
+        return low <= v < (low // 10000 + 1) * 10000
+    if condition.startswith(">="):
+        return v >= to_num(condition[2:])
+    if condition.startswith("<"):
+        return v < to_num(condition[1:])
+    return v == to_num(condition)
+
+
+def build_model(packages, root):
+    """Строит текст модели MiniZinc по метаданным."""
+    lines = []
+
+    # Переменные: для каждого пакета набор его версий, 0 — не установлен
+    for name, versions in packages.items():
+        values = [0] + [to_num(v) for v in versions]
+        lines.append(f"var {{{', '.join(map(str, values))}}}: {name};")
+
+    # Корневой пакет установлен обязательно
+    root_version = next(iter(packages[root]))
+    lines.append(f"constraint {root} = {to_num(root_version)};")
+
+    # Зависимости: если выбрана версия пакета, то зависимость
+    # должна быть установлена в одной из подходящих версий
+    for name, versions in packages.items():
+        for version, deps in versions.items():
+            for dep, condition in deps.items():
+                allowed = [to_num(v) for v in packages[dep] if matches(v, condition)]
+                lines.append(f"constraint {name} = {to_num(version)} -> "
+                             f"{dep} in {{{', '.join(map(str, allowed))}}};")
+
+    # Пакет ставится, только если он кому-то нужен
+    for name in packages:
+        if name == root:
+            continue
+        users = [f"{other} = {to_num(v)}"
+                 for other, versions in packages.items()
+                 for v, deps in versions.items() if name in deps]
+        reason = " \\/ ".join(users) if users else "false"
+        lines.append(f"constraint {name} != 0 -> ({reason});")
+
+    # Как менеджер пакетов: выбираем самые новые версии
+    lines.append(f"solve maximize {' + '.join(packages)};")
+
+    # Вывод: имя=число, по строке на пакет
+    lines.append("output [" + ", ".join(
+        f'"{name}=\\({name})\\n"' for name in packages) + "];")
+    return "\n".join(lines)
+
+
+model = build_model(packages, ROOT)
+print("Сгенерированная модель MiniZinc:")
+print(model)
+
+with open("deps.mzn", "w") as f:
+    f.write(model)
+
+# Запуск решателя
+result = subprocess.run([r"C:\Program Files\MiniZinc\minizinc.exe", "--solver", "gecode", "deps.mzn"],
+                        capture_output=True, text=True)
+
+if "=====UNSATISFIABLE=====" in result.stdout:
+    print("\nРешения нет: зависимости противоречат друг другу")
+else:
+    print("\nВыбранные версии:")
+    # Последнее решение перед "----------" — оптимальное
+    last = result.stdout.strip().split("----------")[-2]
+    for line in last.strip().splitlines():
+        name, value = line.split("=")
+        value = int(value)
+        print(f"  {name}: {to_str(value) if value else 'не установлен'}")
+```
