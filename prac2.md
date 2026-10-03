@@ -1,6 +1,6 @@
 # Решения задач практической работы 2
 ## Задача 1
-```
+```bash
 apk update
 apk add py3-pip py3-matplotlib
 
@@ -18,7 +18,7 @@ tar -xzf matplotlib-3.2.1.tar.gz
 head -20 matplotlib-3.2.1/PKG-INFO
 ```
 ## Задача 2
-```
+```bash
 apk add nodejs npm
 npm view express
 
@@ -30,7 +30,7 @@ tar -xzf express-4.18.2.tgz
 cat package/package.json
 ```
 ## Задача 3
-```
+```bash
 apk add graphviz
 
 cat > matplotlib.dot << 'EOF'
