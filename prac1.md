@@ -1,31 +1,31 @@
 # Решения задач практической работы 1
 
-## Задача 1.
+## Задача 1
 ```bash
-cut -d: -f1 /etc/passwd | sort
+grep -o '^[^:]*' /etc/passwd | sort
 ```
-## Задача 2.
+## Задача 2
 ```bash
 cat /etc/protocols | sort -k2 -n -r | head -5 | awk '{print $2, $1}'
 ```
-## Задача 3.
+## Задача 3
 ```bash
 #!/bin/bash
- 
+
 if [ "$#" -eq 0 ]; then
     echo "Использование: $0 \"текст\"" >&2
     exit 1
 fi
- 
+
 text="$1"
 len=${#text}
- 
+
 line="+"
 for ((i = 0; i < len + 2; i++)); do
     line+="-"
 done
 line+="+"
- 
+
 echo "$line"
 echo "| $text |"
 echo "$line"
@@ -33,53 +33,53 @@ echo "$line"
 ## Задача 4
 ```bash
 #!/bin/bash
- 
+
 if [ "$#" -eq 0 ]; then
     echo "Использование: $0 <файл>" >&2
     exit 1
 fi
- 
+
 file="$1"
- 
+
 if [ ! -f "$file" ]; then
     echo "Файл не найден: $file" >&2
     exit 1
 fi
- 
+
 grep -oE '\b[A-Za-z_][A-Za-z0-9_]*\b' "$file" | sort -u | tr '\n' ' '
 echo
 ```
 ## Задача 5
 ```bash
 #!/bin/bash
- 
+
 if [ "$#" -eq 0 ]; then
     echo "Использование: $0 <файл>" >&2
     exit 1
 fi
- 
+
 file="$1"
- 
+
 if [ ! -f "$file" ]; then
     echo "Файл не найден: $file" >&2
     exit 1
 fi
- 
+
 # Дать права на выполнение
 chmod +x "$file"
- 
+
 sudo cp "$file" /usr/local/bin/
 echo "Команда '$file' зарегистрирована"
 ```
 ## Задача 6
-``` bash                                                                                                               
+```bash
 #!/bin/bash
 
 for file in *.c *.js *.py; do
     [ -f "$file" ] || continue
     first=$(head -n 1 "$file")
-    
-   case "$file" in 
+
+   case "$file" in
         *.c|*.js)
             if [[ "$first" =~ ^[[:space:]]*(//|/\*) ]]; then
                 echo "$file: there is comment"
@@ -98,30 +98,30 @@ for file in *.c *.js *.py; do
 done
 ```
 ## Задача 7
-``` bash                                                  
+```bash
 #!/bin/bash
 
 path="${1:-.}"
 
-find "$path" -type f -print0 | xargs -0 md5sum | sort | awk '   
+find "$path" -type f -print0 | xargs -0 md5sum | sort | awk '
     {
         hash = $1
         file = substr($0, length($1) + 3)
         if (hash in seen) {
             if (!(hash in header_shown)) {
-                print "Group of duplicates (md5) "hash "):"                   
+                print "Group of duplicates (md5 " hash "):"
                 print "  " seen[hash]
                 header_shown[hash] = 1
             }
-            print "  " file 
+            print "  " file
         } else {
             seen[hash] = file
         }
     }
 '
 ```
-# Задача 8
-``` bash
+## Задача 8
+```bash
 #!/bin/bash
 
 dir="${1:-.}"
@@ -143,9 +143,9 @@ fi
 
 tar -cf "$archive" "${files[@]}"
 echo "Создан архив: $archive (файлов: ${#files[@]})"
-``` 
-# Задача 9
-``` bash
+```
+## Задача 9
+```bash
 #!/bin/bash
 
 input="$1"
@@ -166,8 +166,8 @@ sed "s/    /${tab}/g" "$input" > "$output"
 
 echo "Готово: $output"
 ```
-# Задача 10
-``` bash
+## Задача 10
+```bash
 #!/bin/bash
 
 dir="$1"
